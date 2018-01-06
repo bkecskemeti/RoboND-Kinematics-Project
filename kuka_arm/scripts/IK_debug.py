@@ -103,45 +103,22 @@ def test_code(test_case):
 
     # EE rotation matrix
     r, p, y = symbols('r p y')
-
-    ROT_x = rotation_x(r)
-    ROT_y = rotation_y(p)
-    ROT_z = rotation_z(y)
-
-    ROT_EE = ROT_z * ROT_y * ROT_x
-
-    Rot_Error = ROT_z.subs(y, radians(180)) * ROT_y.subs(p, radians(-90))
-
-    ROT_EE = ROT_EE * Rot_Error
-    ROT_EE = ROT_EE.subs({'r': roll, 'p': pitch, 'y': yaw})
-
     EE = Matrix([[px],[py],[pz]])
 
+    ROT_EE_form = rotation_base_ee(r,p,y)
+    ROT_EE = ROT_EE_form.subs({'r': roll, 'p': pitch, 'y': yaw})
+
+    # Find original wrist center position
+    
     WC = EE - (0.303) * ROT_EE[:,2]
 
     # Geometric IK method
-
-    theta1 = atan2(WC[1], WC[0])
-
-    side_a = 1.501
-    side_b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
-    side_c = 1.25
-
-    angle_a = angle(side_b,side_c,side_a)
-    angle_b = angle(side_a,side_c,side_b)
-    angle_c = angle(side_a,side_b,side_c)
-
-    theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
-    theta3 = pi/2. - (angle_b + 0.036)
+    (theta1, theta2, theta3) = inverse_kinematics_1(WC)
 
     R0_3 = T0_1[0:3, 0:3] * T1_2[0:3, 0:3] * T2_3[0:3, 0:3]
-    R0_3 = R0_3.evalf(subs={q1: theta1, q2: theta2, q3: theta3})
+    R3_6 = R0_3.evalf(subs={q1: theta1, q2: theta2, q3: theta3}).inv('LU') * ROT_EE
 
-    R3_6 = R0_3.inv('LU') * ROT_EE
-
-    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-    theta5 = atan2(sqrt(R3_6[0,2]*R3_6[0,2] + R3_6[2,2]*R3_6[2,2]), R3_6[1,2])
-    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+    (theta4, theta5, theta6) = inverse_kinematics_2(R3_6)
 
     ##
     ########################################################################################
