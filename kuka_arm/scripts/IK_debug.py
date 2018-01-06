@@ -3,9 +3,7 @@ from time import time
 from mpmath import radians
 import tf
 
-import sys
-sys.path.append('kuka_arm/scripts')
-import kinematics
+from kinematics import *
 
 '''
 Format of test case is [ [[EE position],[EE orientation as quaternions]],[WC location],[joint angles]]
@@ -129,9 +127,9 @@ def test_code(test_case):
     side_b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
     side_c = 1.25
 
-    angle_a = angle(b,c,a)
-    angle_b = angle(a,c,b)
-    angle_c = angle(a,b,c)
+    angle_a = angle(side_b,side_c,side_a)
+    angle_b = angle(side_a,side_c,side_b)
+    angle_c = angle(side_a,side_b,side_c)
 
     theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
     theta3 = pi/2. - (angle_b + 0.036)
