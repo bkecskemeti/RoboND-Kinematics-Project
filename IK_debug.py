@@ -127,7 +127,7 @@ def test_code(test_case):
     ROT_EE = ROT_EE * Rot_Error
     ROT_EE = ROT_EE.subs({'r': roll, 'p': pitch, 'y': yaw})
 
-    EE = Matrix([[px],[py], [pz]])
+    EE = Matrix([[px],[py],[pz]])
 
     WC = EE - (0.303) * ROT_EE[:,2]
 
