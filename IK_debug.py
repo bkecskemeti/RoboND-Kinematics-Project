@@ -70,13 +70,13 @@ def test_code(test_case):
     q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
 
     # Modified DH params
-    DH_Table = { alpha0:     0., a0:     0., d1:  0.75, q1:          q1,
-                 alpha1: -pi/2., a1:   0.35, d2:    0., q2: -pi/2. + q2,
-                 alpha2:     0., a2:   1.25, d3:    0., q3:          q3,
+    DH_Table = { alpha0:      0, a0:      0, d1:  0.75, q1:          q1,
+                 alpha1: -pi/2., a1:   0.35, d2:     0, q2: -pi/2. + q2,
+                 alpha2:     0., a2:   1.25, d3:     0, q3:          q3,
                  alpha3: -pi/2., a3: -0.054, d4:   1.5, q4:          q4,
-                 alpha4:  pi/2., a4:      0, d5:    0., q5:          q5,
-                 alpha5: -pi/2., a5:      0, d6:    0., q6:          q6,
-                 alpha6:     0., a6:      0, d7: 0.303, q7:          0. }
+                 alpha4:  pi/2., a4:      0, d5:     0, q5:          q5,
+                 alpha5: -pi/2., a5:      0, d6:     0, q6:          q6,
+                 alpha6:      0, a6:      0, d7: 0.303, q7:           0 }
 
     # Modified DH Transformation Matrix
     def TF_Matrix(alpha, a, d, q):
@@ -110,22 +110,21 @@ def test_code(test_case):
     # EE rotation matrix
     r, p, y = symbols('r p y')
 
-    ROT_x = Matrix([[   1,      0,      0],
-                    [   0, cos(r), -sin(r)],
-                    [   0, sin(r),  cos(r)]])   # roll
-    ROT_y = Matrix([[   1,      0,      0],
-                    [   0, cos(p), -sin(p)],
-                    [   0, sin(p),  cos(p)]])   # pitch
-    ROT_z = Matrix([[   1,      0,      0],
-                    [   0, cos(y), -sin(y)],
-                    [   0, sin(y),  cos(y)]])   # yaw
+    ROT_x = Matrix([[      1,      0,      0],
+                    [      0, cos(r), -sin(r)],
+                    [      0, sin(r),  cos(r)]])   # roll
+    ROT_y = Matrix([[ cos(p),      0,  sin(p)],
+                    [      0,      1,       0],
+                    [-sin(p),      0,  cos(p)]])   # pitch
+    ROT_z = Matrix([[ cos(y),-sin(y),       0],
+                    [ sin(y), cos(y),       0],
+                    [      0,      0,       1]])   # yaw
 
     ROT_EE = ROT_z * ROT_y * ROT_x
 
     Rot_Error = ROT_z.subs(y, radians(180)) * ROT_y.subs(p, radians(-90))
 
     ROT_EE = ROT_EE * Rot_Error
-
     ROT_EE = ROT_EE.subs({'r': roll, 'p': pitch, 'y': yaw})
 
     EE = Matrix([[px],[py], [pz]])
@@ -137,7 +136,7 @@ def test_code(test_case):
     theta1 = atan2(WC[1], WC[0])
 
     side_a = 1.501
-    side_b = sqrt(pow(sqrt(WC[0] * WC[1] + WC[1] * WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
+    side_b = sqrt(pow(sqrt(WC[0] * WC[0] + WC[1] * WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
     side_c = 1.25
 
     angle_a = acos(side_b * side_b + side_c * side_c - side_a * side_a) / (2 * side_b * side_c)
@@ -153,7 +152,7 @@ def test_code(test_case):
     R3_6 = R0_3.inv('LU') * ROT_EE
 
     theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-    theta5 = atan2(sqrt(R3_6[0,2] * R3_6[0,2] + R3_6[2,2] * R3_6[2,2]), R3_6[1,2])
+    theta5 = atan2(sqrt(R3_6[0,2]*R3_6[0,2] + R3_6[2,2]*R3_6[2,2]), R3_6[1,2])
     theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
     ##
