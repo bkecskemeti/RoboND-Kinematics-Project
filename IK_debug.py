@@ -3,6 +3,10 @@ from time import time
 from mpmath import radians
 import tf
 
+import sys
+sys.path.append('kuka_arm/scripts')
+import kinematics
+
 '''
 Format of test case is [ [[EE position],[EE orientation as quaternions]],[WC location],[joint angles]]
 You can generate additional test cases by setting up your kuka project and running `$ roslaunch kuka_arm forward_kinematics.launch`
@@ -78,21 +82,13 @@ def test_code(test_case):
                  alpha5: -pi/2., a5:      0, d6:     0, q6:          q6,
                  alpha6:      0, a6:      0, d7: 0.303, q7:           0 }
 
-    # Modified DH Transformation Matrix
-    def TF_Matrix(alpha, a, d, q):
-        TF = Matrix([[           cos(q),            -sin(q),           0,             a],
-                     [sin(q)*cos(alpha),  cos(q)*cos(alpha), -sin(alpha), -sin(alpha)*d],
-                     [sin(q)*sin(alpha),  cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
-                     [                0,                  0,           0,              1]])
-        return TF
-
-    T0_1 = TF_Matrix(alpha0, a0, d1, q1).subs(DH_Table)
-    T1_2 = TF_Matrix(alpha1, a1, d2, q2).subs(DH_Table)
-    T2_3 = TF_Matrix(alpha2, a2, d3, q3).subs(DH_Table)
-    T3_4 = TF_Matrix(alpha3, a3, d4, q4).subs(DH_Table)
-    T4_5 = TF_Matrix(alpha4, a4, d5, q5).subs(DH_Table)
-    T5_6 = TF_Matrix(alpha5, a5, d6, q6).subs(DH_Table)
-    T6_EE = TF_Matrix(alpha6, a6, d7, q7).subs(DH_Table)
+    T0_1 = transformation_matrix(alpha0, a0, d1, q1).subs(DH_Table)
+    T1_2 = transformation_matrix(alpha1, a1, d2, q2).subs(DH_Table)
+    T2_3 = transformation_matrix(alpha2, a2, d3, q3).subs(DH_Table)
+    T3_4 = transformation_matrix(alpha3, a3, d4, q4).subs(DH_Table)
+    T4_5 = transformation_matrix(alpha4, a4, d5, q5).subs(DH_Table)
+    T5_6 = transformation_matrix(alpha5, a5, d6, q6).subs(DH_Table)
+    T6_EE = transformation_matrix(alpha6, a6, d7, q7).subs(DH_Table)
 
     T0_EE = T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6 * T6_EE
 
@@ -110,15 +106,9 @@ def test_code(test_case):
     # EE rotation matrix
     r, p, y = symbols('r p y')
 
-    ROT_x = Matrix([[      1,      0,      0],
-                    [      0, cos(r), -sin(r)],
-                    [      0, sin(r),  cos(r)]])   # roll
-    ROT_y = Matrix([[ cos(p),      0,  sin(p)],
-                    [      0,      1,       0],
-                    [-sin(p),      0,  cos(p)]])   # pitch
-    ROT_z = Matrix([[ cos(y),-sin(y),       0],
-                    [ sin(y), cos(y),       0],
-                    [      0,      0,       1]])   # yaw
+    ROT_x = rotation_x(r)
+    ROT_y = rotation_y(p)
+    ROT_z = rotation_z(y)
 
     ROT_EE = ROT_z * ROT_y * ROT_x
 
@@ -136,14 +126,14 @@ def test_code(test_case):
     theta1 = atan2(WC[1], WC[0])
 
     side_a = 1.501
-    side_b = sqrt(pow(sqrt(WC[0] * WC[0] + WC[1] * WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
+    side_b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
     side_c = 1.25
 
-    angle_a = acos((side_b * side_b + side_c * side_c - side_a * side_a) / (2 * side_b * side_c))
-    angle_b = acos((side_a * side_a + side_c * side_c - side_b * side_b) / (2 * side_a * side_c))
-    angle_c = acos((side_a * side_a + side_b * side_b - side_c * side_c) / (2 * side_a * side_b))
+    angle_a = angle(b,c,a)
+    angle_b = angle(a,c,b)
+    angle_c = angle(a,b,c)
 
-    theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, sqrt(WC[0]*WC[0] + WC[1]*WC[1]) - 0.35)
+    theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
     theta3 = pi/2. - (angle_b + 0.036)
 
     R0_3 = T0_1[0:3, 0:3] * T1_2[0:3, 0:3] * T2_3[0:3, 0:3]
