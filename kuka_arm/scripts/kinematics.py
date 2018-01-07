@@ -1,7 +1,4 @@
 
-def radians(deg):
-    return deg * pi/180.
-
 def angle(a, b, c):
     return acos((a*a + b*b - c*c) / (2*a*b))
 
