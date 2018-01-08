@@ -142,13 +142,18 @@ theta3 = pi/2. - (angle_b + 0.036)
 
 The rest can be calculated as:
 
+Note: as there are multiple solutions to the inverse orientation problem, we need a consistent way of picking one solution to avoid wrist flaps.
+
 ```python
 R0_3 = T0_1[0:3, 0:3]*T1_2[0:3, 0:3]*T2_3[0:3, 0:3]
 R3_6 = R0_3.inv('LU') * ROT_EE
 
-theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-theta5 = atan2(norm(R3_6[0,2], R3_6[2,2]), R3_6[1,2])
-theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+if sin(theta5) < 0:
+    theta4 = atan2(-R3_6[2,2], R3_6[0,2])
+    theta6 = atan2(R3_6[1,1], -R3_6[1,0])
+else:
+    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 ```
 
 ### Project Implementation
