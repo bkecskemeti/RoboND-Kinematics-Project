@@ -4,7 +4,7 @@ from mpmath import radians
 import tf
 
 def angle(a, b, c):
-    """Calculate the angle opposite to side c. 
+    """Calculate the angle opposite to side c.
     """
     return acos((a*a + b*b - c*c) / (2*a*b))
 
@@ -59,4 +59,3 @@ def inverse_kinematics_2(R3_6):
     theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
     return (theta4, theta5, theta6)
-
