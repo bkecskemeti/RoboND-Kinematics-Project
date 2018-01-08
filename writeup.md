@@ -27,53 +27,31 @@ The kinematic model of the Kuka KR210 robot arm is detailed in the session ["Kuk
 
 Regarding the model, the following can be obtained from the file [kr210.urdf.xacro](./kuka_arm/urdf/kr210.urdf.xacro):
 
-Link<sub>1</sub>:
-* Z<sub>0</sub> || Z<sub>1</sub> &rarr; alpha<sub>0</sub>=0,
-* Z<sub>0</sub> and Z<sub>1</sub> are coincident &rarr; a<sub>0</sub>=0
-* d<sub>1</sub> = 0.75 (distance of X<sub>0</sub> to X<sub>1</sub> along Z<sub>0</sub>)
+* Link<sub>1</sub>: &alpha;<sub>0</sub>=0 (Z<sub>0</sub> || Z<sub>1</sub>), a<sub>0</sub>=0 (Z<sub>0</sub> and Z<sub>1</sub> are coincident), d<sub>1</sub> = 0.75 (distance of X<sub>0</sub> to X<sub>1</sub> along Z<sub>0</sub>)
 
-Link<sub>2</sub>:
-* alpha<sub>1</sub> = -90&deg; (rotate Z<sub>1</sub> by 90&deg; clockwise to get Z<sub>2</sub>)
-* a<sub>1</sub> = 0.35 (distance of Z<sub>1</sub> to Z<sub>2</sub> along X<sub>1</sub>)
-* d<sub>2</sub> = 0 (distance of X<sub>1</sub> and X<sub>2</sub>)
-* theta<sub>2</sub> needs an offset of -90&deg;
+* Link<sub>2</sub>: &alpha;<sub>1</sub> = -90&deg; (rotate Z<sub>1</sub> by 90&deg; clockwise to get Z<sub>2</sub>), a<sub>1</sub> = 0.35 (distance of Z<sub>1</sub> to Z<sub>2</sub> along X<sub>1</sub>), d<sub>2</sub> = 0 (distance of X<sub>1</sub> and X<sub>2</sub>). Note: theta<sub>2</sub> needs an offset of -90&deg;.
 
-Link<sub>3</sub>:
-* Z<sub>2</sub> || Z<sub>3</sub> &rarr; alpha<sub>2</sub>=0,
-* a<sub>2</sub> = 1.25 (distance of Z<sub>2</sub> to Z<sub>3</sub> along X<sub>2</sub>)
-* d<sub>3</sub> = 0 (distance of X<sub>2</sub> and X<sub>3</sub> along Z<sub>2</sub>)
+* Link<sub>3</sub>: &alpha;<sub>2</sub>=0 (Z<sub>2</sub> || Z<sub>3</sub>), a<sub>2</sub> = 1.25 (distance of Z<sub>2</sub> to Z<sub>3</sub> along X<sub>2</sub>), d<sub>3</sub> = 0 (distance of X<sub>2</sub> and X<sub>3</sub> along Z<sub>2</sub>)
 
-Link<sub>4</sub>:
-* alpha<sub>3</sub> = -90&deg; (rotate Z<sub>3</sub> by 90&deg; clockwise to get Z<sub>4</sub>)
-* a<sub>3</sub> = -0.054 (distance of Z<sub>3</sub> to Z<sub>4</sub> along X<sub>3</sub>)
-* d<sub>4</sub> = 1.501 (distance of X<sub>3</sub> to X<sub>4</sub>)
+* Link<sub>4</sub>: &alpha;<sub>3</sub> = -90&deg; (rotate Z<sub>3</sub> by 90&deg; clockwise to get Z<sub>4</sub>), a<sub>3</sub> = -0.054 (distance of Z<sub>3</sub> to Z<sub>4</sub> along X<sub>3</sub>), d<sub>4</sub> = 1.5 (distance of X<sub>3</sub> to X<sub>4</sub>)
 
-Link<sub>5</sub>:
-* alpha<sub>4</sub> = 90&deg; (rotate Z<sub>4</sub> by 90&deg; counter-clockwise to get Z<sub>5</sub>)
-* a<sub>4</sub> = 0 (Z<sub>4</sub> and Z<sub>5</sub> have same origin)
-* d<sub>5</sub> = 0 (X<sub>4</sub> = X<sub>5</sub>)
+* Link<sub>5</sub>: &alpha;<sub>4</sub> = 90&deg; (rotate Z<sub>4</sub> by 90&deg; counter-clockwise to get Z<sub>5</sub>), a<sub>4</sub> = 0 (Z<sub>4</sub> and Z<sub>5</sub> have same origin), d<sub>5</sub> = 0 (X<sub>4</sub> = X<sub>5</sub>)
 
-Link<sub>6</sub>:
-* alpha<sub>5</sub> = -90&deg; (rotate Z<sub>5</sub> by 90&deg; clockwise to get Z<sub>6</sub>)
-* a<sub>5</sub> = 0 (Z<sub>5</sub> and Z<sub>6</sub> have same origin)
-* d<sub>6</sub> = 0 (X<sub>5</sub> = X<sub>6</sub>)
+* Link<sub>6</sub>: &alpha;<sub>5</sub> = -90&deg; (rotate Z<sub>5</sub> by 90&deg; clockwise to get Z<sub>6</sub>), a<sub>5</sub> = 0 (Z<sub>5</sub> and Z<sub>6</sub> have same origin),  d<sub>6</sub> = 0 (X<sub>5</sub> = X<sub>6</sub>)
 
-End Effector (EE):
-* Z<sub>6</sub> || Z<sub>G</sub> &rarr; alpha<sub>EE</sub>=0,
-* a<sub>EE</sub> = 0 (Z<sub>6</sub> = Z<sub>G</sub>)
-* d<sub>EE</sub> =  0.303 (distance of X<sub>6</sub> to X<sub>G</sub> along Z<sub>G</sub>)
+* End Effector (EE): &alpha;<sub>EE</sub>=0 (Z<sub>6</sub> || Z<sub>G</sub>), a<sub>EE</sub> = 0 (Z<sub>6</sub> = Z<sub>G</sub>), d<sub>EE</sub> =  0.303 (distance of X<sub>6</sub> to X<sub>G</sub> along Z<sub>G</sub>)
 
 
 **This is summarized in the following DH table:**
 
-i | alpha<sub>i-1</sub> | a<sub>i-1</sub> | d<sub>i</sub> | theta<sub>i</sub>
+i | &alpha;<sub>i-1</sub> | a<sub>i-1</sub> | d<sub>i</sub> | &theta;<sub>i</sub>
 --- | --- | --- | --- | ---
-1 | 0&deg; | 0 | 0.75 | theta<sub>1</sub>
-2 | -90&deg; | 0.35 | 0 | -90&deg; + theta<sub>2</sub>
-3 | 0&deg; | 1.25 | 0 | theta<sub>3</sub>
-4 | -90&deg; | -0.054 | 1.501 | theta<sub>4</sub>
-5 | 90&deg; | 0 | 0 | theta<sub>5</sub>
-6 | -90&deg; | 0 | 0 | theta<sub>6</sub>
+1 | 0&deg; | 0 | 0.75 | &theta;<sub>1</sub>
+2 | -90&deg; | 0.35 | 0 | -90&deg; + &theta;<sub>2</sub>
+3 | 0&deg; | 1.25 | 0 | &theta;<sub>3</sub>
+4 | -90&deg; | -0.054 | 1.5 | &theta;<sub>4</sub>
+5 | 90&deg; | 0 | 0 | &theta;<sub>5</sub>
+6 | -90&deg; | 0 | 0 | &theta;<sub>6</sub>
 EE | 0&deg; | 0 | 0.303 | 0
 
 #### 2. Using the DH parameter table you derived earlier, create individual transformation matrices about each joint. In addition, also generate a generalized homogeneous transform between base_link and gripper_link using only end-effector(gripper) pose.
@@ -116,7 +94,7 @@ The coordinates of the wrist center can be calculated as follows:
 WC = EE - (0.303) * ROT_EE[:,2]
 ```
 
-The robot arm looks schematically like this from the side:
+I drawed the side-view of the robot arm schematically like this:
 
 ![side view][kuka_side_view]
 
