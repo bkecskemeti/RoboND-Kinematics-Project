@@ -149,7 +149,7 @@ def angle(a, b, c):
     """
     return acos((a*a + b*b - c*c) / (2*a*b))
 
-a = 1.501
+a = 1.5
 b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
 c = 1.25
 
@@ -208,14 +208,12 @@ theta4 = atan2(R3_6[2,2], -R3_6[0,2])
 theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 ```
 
-*Note:* the rotation transform has a singularity when `sin(theta5)=0`, therefore the above code can result in unnecessary flapping motion of the wrist. One way to fix this is to make sure `theta4` and `theta6` are placed in the correct quadrant:
+*Note:* if `R3_6[1,2]` is approximately 0, `atan2` can "flicker" between -&pi;/2 and &pi;/2, resulting in unnecessary flapping motion of the wrist. To fix this, instead of the simple calculation above, I used the `euler_from_matrix` function from the [tf library](http://docs.ros.org/jade/api/tf/html/python/transformations.html). The source of `euler_from_matrix` can be found [here](https://www.lfd.uci.edu/~gohlke/code/transformations.py.html).
+
 ```python
-if sin(theta5) < 0.:
-    theta4 = atan2(-R3_6[2,2], R3_6[0,2])
-    theta6 = atan2(R3_6[1,1], -R3_6[1,0])
-else:
-    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+def inverse_kinematics_2(R3_6):
+    alpha, beta, gamma = tf.transformations.euler_from_matrix(np.array(R3_6).astype(np.float64), axes='rxyz')
+    return (np.pi/2 + theta4, np.pi/2 - theta5, gamma)
 ```
 
 ### Project Implementation

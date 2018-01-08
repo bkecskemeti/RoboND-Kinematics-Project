@@ -41,8 +41,11 @@ def rotation_base_ee(roll, pitch, yaw):
 def inverse_kinematics_1(WC):
     theta1 = atan2(WC[1], WC[0])
 
+    # distance of X3 to X4
     side_a = 1.5
+    # distance from O2 to WC
     side_b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
+    # distance of Z2 to Z3 along X2
     side_c = 1.25
 
     angle_a = angle(side_b,side_c,side_a)
