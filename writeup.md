@@ -116,13 +116,13 @@ beta = angle(side_a,side_c,side_b)
 gamma = angle(side_a,side_b,side_c)
 ```
 
-**Theta<sub>1</sub>:** as theta<sub>1</sub> is the only angle moving the wrist center in the x-y plane, it follows easily that the angle can be obtained just from projecting the wrist center to the x-y plane:
+**&Theta;<sub>1</sub>:** as &theta;<sub>1</sub> is the only angle moving the wrist center in the x-y plane, it follows easily that the angle can be obtained just from projecting the wrist center to the x-y plane:
 
 ```python
 theta1 = atan2(WC[1], WC[0])
 ```
 
-**Theta<sub>2</sub>:** (see drawing above)
+**&Theta;<sub>2</sub>:** (see drawing above)
 
 ```python
 def norm(a, b):
@@ -131,14 +131,14 @@ def norm(a, b):
 theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
 ```
 
-**Theta<sub>3</sub>:** (see drawing above)
+**&Theta;<sub>3</sub>:** (see drawing above)
 
 ```python
 # 0.036 = atan2(b, sqrt(a*a - d*d))
 theta3 = pi/2. - (angle_b + 0.036)
 ```
 
-**Theta<sub>4, 5, 6</sub>:**
+**&Theta;<sub>4, 5, 6</sub>:**
 
 The rest can be calculated as:
 
