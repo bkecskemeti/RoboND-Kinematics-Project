@@ -6,8 +6,9 @@
 
 [rviz_screenshot]: ./misc_images/rviz_screenshot_1.png
 [DH_model]: ./misc_images/DH_model.png
-[image2]: ./misc_images/misc3.png
-[image3]: ./misc_images/misc2.png
+[gazebo_screenshot]: ./misc_images/gazebo_screenshot.png
+[kuka_side_view]: ./misc_images/kuka_side_view.png
+
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
@@ -70,7 +71,7 @@ i | alpha<sub>i-1</sub> | a<sub>i-1</sub> | d<sub>i</sub> | theta<sub>i</sub>
 1 | 0&deg; | 0 | 0.75 | theta<sub>1</sub>
 2 | -90&deg; | 0.35 | 0 | -90&deg; + theta<sub>2</sub>
 3 | 0&deg; | 1.25 | 0 | theta<sub>3</sub>
-4 | -90&deg; | -0.054 | 1.5 | theta<sub>4</sub>
+4 | -90&deg; | -0.054 | 1.501 | theta<sub>4</sub>
 5 | 90&deg; | 0 | 0 | theta<sub>5</sub>
 6 | -90&deg; | 0 | 0 | theta<sub>6</sub>
 EE | 0&deg; | 0 | 0.303 | 0
@@ -109,10 +110,27 @@ def rotation_base_ee(roll, pitch, yaw):
 
 #### 3. Decouple Inverse Kinematics problem into Inverse Position Kinematics and inverse Orientation Kinematics; doing so derive the equations to calculate all individual joint angles.
 
-The wrist center can be calculated as follows:
+The coordinates of the wrist center can be calculated as follows:
 
 ```python
 WC = EE - (0.303) * ROT_EE[:,2]
+```
+
+The robot arm looks schematically like this from the side:
+
+![side view][kuka_side_view]
+
+To get the angles theta<sub>1</sub> ... theta<sub>3</sub>, we need to calculate a, b, c, &alpha;, &beta;, &gamma;. The angles can be found using the cosine law
+acos( (a<sup>2</sup> + b<sup>2</sup> - c<sup>2</sup>) / 2ab ).
+
+```python
+a = 1.501
+b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
+c = 1.25
+
+alpha = angle(side_b,side_c,side_a)
+beta = angle(side_a,side_c,side_b)
+gamma = angle(side_a,side_b,side_c)
 ```
 
 **Theta<sub>1</sub>:** as theta<sub>1</sub> is the only angle moving the wrist center in the x-y plane, it follows easily that the angle can be obtained just from projecting the wrist center to the x-y plane:
@@ -124,35 +142,42 @@ theta1 = atan2(WC[1], WC[0])
 **Theta<sub>2</sub>:**
 
 ```python
+def norm(a, b):
+    return sqrt(a*a + b*b)
+
 theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
 ```
 
 **Theta<sub>3</sub>:**
 
-**Theta<sub>4</sub>:**
+```python
+# 0.036 = atan2(b, sqrt(a*a - d*d))
+theta3 = pi/2. - (angle_b + 0.036)
+```
+
+**Theta<sub>4, 5, 6</sub>:**
+
+The rest can be calculated as:
 
 ```python
 R0_3 = T0_1[0:3, 0:3]*T1_2[0:3, 0:3]*T2_3[0:3, 0:3]
 R3_6 = R0_3.inv('LU') * ROT_EE
+
+theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+theta5 = atan2(norm(R3_6[0,2], R3_6[2,2]), R3_6[1,2])
+theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 ```
-
-
-
-
-**Theta<sub>5</sub>:**
-
-**Theta<sub>6</sub>:**
-
-
-![alt text][image2]
 
 ### Project Implementation
 
 #### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results.
 
+The code `IK_server.py` calls the logic described previously, which is implemented in `kinematics.py`.
 
-Here I'll talk about the code, what techniques I used, what worked and why, where the implementation might fail and how I might improve it if I were going to pursue this project further.  
+The main methods are `inverse_kinematics_1(WC)` and `inverse_kinematics_2(R3_6)`.
 
+The code succeeds in picking correctly the objects and dropping them in the cylinder most of the time:
 
-And just for fun, another example image:
-![alt text][image3]
+![Gazebo sceenshot of dropping to cylinder][gazebo_screenshot]
+
+ However, I noticed, that the final path of the robot arm is unnecessarily complicated (to be fixed).
