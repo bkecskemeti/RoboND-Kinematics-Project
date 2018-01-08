@@ -29,7 +29,7 @@ Regarding the model, the following can be obtained from the file [kr210.urdf.xac
 
 * Link<sub>1</sub>: &alpha;<sub>0</sub>=0 (Z<sub>0</sub> || Z<sub>1</sub>), a<sub>0</sub>=0 (Z<sub>0</sub> and Z<sub>1</sub> are coincident), d<sub>1</sub> = 0.75 (distance of X<sub>0</sub> to X<sub>1</sub> along Z<sub>0</sub>)
 
-* Link<sub>2</sub>: &alpha;<sub>1</sub> = -90&deg; (rotate Z<sub>1</sub> by 90&deg; clockwise to get Z<sub>2</sub>), a<sub>1</sub> = 0.35 (distance of Z<sub>1</sub> to Z<sub>2</sub> along X<sub>1</sub>), d<sub>2</sub> = 0 (distance of X<sub>1</sub> and X<sub>2</sub>). Note: theta<sub>2</sub> needs an offset of -90&deg;.
+* Link<sub>2</sub>: &alpha;<sub>1</sub> = -90&deg; (rotate Z<sub>1</sub> by 90&deg; clockwise to get Z<sub>2</sub>), a<sub>1</sub> = 0.35 (distance of Z<sub>1</sub> to Z<sub>2</sub> along X<sub>1</sub>), d<sub>2</sub> = 0 (distance of X<sub>1</sub> and X<sub>2</sub>). Note: &theta;<sub>2</sub> needs an offset of -90&deg;.
 
 * Link<sub>3</sub>: &alpha;<sub>2</sub>=0 (Z<sub>2</sub> || Z<sub>3</sub>), a<sub>2</sub> = 1.25 (distance of Z<sub>2</sub> to Z<sub>3</sub> along X<sub>2</sub>), d<sub>3</sub> = 0 (distance of X<sub>2</sub> and X<sub>3</sub> along Z<sub>2</sub>)
 
@@ -98,10 +98,15 @@ I drawed the side-view of the robot arm schematically like this:
 
 ![side view][kuka_side_view]
 
-To get the angles theta<sub>1</sub> ... theta<sub>3</sub>, we need to calculate a, b, c, &alpha;, &beta;, &gamma;. The angles can be found using the cosine law
+To get the angles &theta;<sub>1</sub> ... &theta;<sub>3</sub>, we need to calculate a, b, c, &alpha;, &beta;, &gamma;. The angles can be found using the cosine law
 acos( (a<sup>2</sup> + b<sup>2</sup> - c<sup>2</sup>) / 2ab ).
 
 ```python
+def angle(a, b, c):
+    """Calculate the angle opposite to side c.
+    """
+    return acos((a*a + b*b - c*c) / (2*a*b))
+
 a = 1.501
 b = sqrt(pow(norm(WC[0], WC[1]) - 0.35, 2) + pow(WC[2] - 0.75, 2))
 c = 1.25
