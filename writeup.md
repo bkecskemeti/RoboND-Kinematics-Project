@@ -66,13 +66,48 @@ def transformation_matrix(alpha, a, d, q):
                    [                 0,                 0,           0,             1]])
 ```
 
-Subsequently, the individual transformation matrices are calculated as:
+Subsequently, the individual transformation matrices are calculated by simply substituting each row from the DH table:
 
 ```python
-T0_1 = transformation_matrix(alpha0, a0, d1, q1).subs(DH_Table)
-# ...
-T5_6 = transformation_matrix(alpha5, a5, d6, q6).subs(DH_Table)
-T6_EE = transformation_matrix(alpha6, a6, d7, q7).subs(DH_Table)
+T(i-1)_i = transformation_matrix(alpha(i-1), a(i-1), d(i), q(i)).subs(DH_Table)
+```
+
+```python
+T0_1 = Matrix([[  cos(theta1), -sin(theta1),   0,     0],
+               [  sin(theta1),  cos(theta1),   0,     0],
+               [            0,             0,  1,  0.75],
+               [            0,             0,  0,     1]])
+
+# note there is a -90 deg offset in theta2
+T1_2 = Matrix([[ sin(theta2),  cos(theta2),   0,   0.35],
+               [           0,            0,   1,      0],
+               [ cos(theta2), -sin(theta2),   0,      0],
+               [           0,            0,   0,      1]])
+
+T2_3 = Matrix([[ cos(theta3), -sin(theta3),   0,   1.25],
+               [ sin(theta3),  cos(theta3),   0,      0],
+               [           0,            0,   1,      0],
+               [           0,            0,   0,      1]])
+
+T3_4 = Matrix([[ cos(theta4), -sin(theta4),   0, -0.054],
+               [           0,            0,   1,    1.5],
+               [-sin(theta4), -cos(theta4),   0,      0],
+               [           0,            0,   0,      1]])
+
+T4_5 = Matrix([[ cos(theta5), -sin(theta5),   0,      0],
+               [           0,            0,  -1,      0],
+               [ sin(theta5),  cos(theta5),   0,      0],
+               [           0,            0,   0,      1]])
+
+T5_6 = Matrix([[ cos(theta6), -sin(theta6),   0,      0],
+               [           0,            0,   1,      0],
+               [-sin(theta6), -cos(theta6),   0,      0],
+               [           0,            0,   0,      1]])
+
+T6_EE = Matrix([[ cos(thetaEE), -sin(thetaEE),   0,     0],
+                [ sin(thetaEE),  cos(thetaEE),   0,     0],
+                [            0,             0,   1, 0.303],
+                [            0,             0,   0,     1]])
 ```
 
 The rotation matrix between the base link and gripper link is calculated as the multiplication of rotation matrices of yaw, pitch, and roll, and then a correction matrix as described in the section ["Inverse Kinematics with Kuka KR210"](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/a1abb738-84ee-48b1-82d7-ace881b5aec0).
