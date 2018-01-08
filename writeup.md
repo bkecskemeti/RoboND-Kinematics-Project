@@ -8,6 +8,7 @@
 [DH_model]: ./misc_images/DH_model.png
 [gazebo_screenshot]: ./misc_images/gazebo_screenshot.png
 [kuka_side_view]: ./misc_images/kuka_side_view.png
+[R3_6_formula]: ./misc_images/R3_6_formula.png
 
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
@@ -110,7 +111,13 @@ T6_EE = Matrix([[ cos(thetaEE), -sin(thetaEE),   0,     0],
                 [            0,             0,   0,     1]])
 ```
 
-The rotation matrix between the base link and gripper link is calculated as the multiplication of rotation matrices of yaw, pitch, and roll, and then a correction matrix as described in the section ["Inverse Kinematics with Kuka KR210"](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/a1abb738-84ee-48b1-82d7-ace881b5aec0).
+The rotation matrix between the base link and gripper link is calculated as the multiplication of rotation matrices of yaw, pitch, and roll, and then a correction matrix as described in the section ["Inverse Kinematics with Kuka KR210"](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/a1abb738-84ee-48b1-82d7-ace881b5aec0):
+
+```python
+# huge complicated matrix with cells linear expressions of:
+# sin(theta_i), cos(theta_i), sin(theta_i + theta_i+1), cos(theta_i + theta_i+1)
+T0_EE = simplify(T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6 * T6_EE)
+```
 
 The correction matrix accounts for the difference between the orientation of the base frame and the gripper frame, and can be found by rotating 180 degrees about the z axis, then -90 degrees around the y axis:
 
@@ -175,20 +182,38 @@ theta3 = pi/2. - (angle_b + 0.036)
 
 **&Theta;<sub>4, 5, 6</sub>:**
 
-The rest can be calculated as:
+The solution to the inverse orientation problem follows from:
 
-Note: as there are multiple solutions to the inverse orientation problem, we need a consistent way of picking one solution to avoid wrist flaps.
+<sub>6</sub><sup>0</sup>R = <sub>3</sub><sup>0</sup>R * <sub>6</sub><sup>3</sup>R &rarr;
+<sub>6</sub><sup>3</sup>R = (<sub>3</sub><sup>0</sup>R)<sup>-1</sup> * <sub>6</sub><sup>0</sup>R
+
+where: <sub>3</sub><sup>0</sup>R = <sub>1</sub><sup>0</sup>T * <sub>2</sub><sup>1</sup>T * <sub>3</sub><sup>2</sup>T with the transformation matrices already calculated above.
+
+Calculating the multiplications and inverse:
 
 ```python
-R0_3 = T0_1[0:3, 0:3]*T1_2[0:3, 0:3]*T2_3[0:3, 0:3]
-R3_6 = R0_3.inv('LU') * ROT_EE
+R0_3 = T0_1[0:3, 0:3] * T1_2[0:3, 0:3] * T2_3[0:3, 0:3]
+R3_6 = simplify(R0_3.inv('LU') * ROT_EE)
+```
 
-if sin(theta5) < 0:
-    theta4 = atan2(-R3_6[2,2], R3_6[0,2])
-    theta6 = atan2(R3_6[1,1], -R3_6[1,0])
-else:
-    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+The result is:
+
+![Formula for R3_6][R3_6_formula]
+
+Calculating the angles from the rotation matrix can be done as described in the section ["Euler angles"](https://classroom.udacity.com/nanodegrees/nd209/parts/c199593e-1e9a-4830-8e29-2c86f70f489e/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/87c52cd9-09ba-4414-bc30-24ae18277d24/concepts/a124f98b-1ed5-45f5-b8eb-6c40958c1a6b#):
+
+```python
+theta5 = atan2(norm(R3_6[0,2], R3_6[2,2]), R3_6[1,2])
+theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+```
+
+*Note:* if `R3_6[1,2]` is approximately 0, `atan2` can "flicker" between -&pi;/2 and &pi;/2, resulting in unnecessary flapping motion of the wrist. To fix this, instead of the simple calculation above, I used the `euler_from_matrix` function from the [tf library](http://docs.ros.org/jade/api/tf/html/python/transformations.html). The source of `euler_from_matrix` can be found [here](https://www.lfd.uci.edu/~gohlke/code/transformations.py.html).
+
+```python
+def inverse_kinematics_2(R3_6):
+    alpha, beta, gamma = tf.transformations.euler_from_matrix(np.array(R3_6).astype(np.float64), axes='rxyz')
+    return (np.pi/2 + theta4, np.pi/2 - theta5, gamma)
 ```
 
 ### Project Implementation
@@ -202,5 +227,3 @@ The main methods are `inverse_kinematics_1(WC)` and `inverse_kinematics_2(R3_6)`
 The code succeeds in picking correctly the objects and dropping them in the cylinder most of the time:
 
 ![Gazebo sceenshot of dropping to cylinder][gazebo_screenshot]
-
- However, I noticed, that the final path of the robot arm is unnecessarily complicated (to be fixed).

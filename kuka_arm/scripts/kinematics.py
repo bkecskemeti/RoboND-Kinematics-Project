@@ -1,3 +1,4 @@
+import numpy as np
 from sympy import *
 from time import time
 from mpmath import radians
@@ -54,14 +55,19 @@ def inverse_kinematics_1(WC):
     return (theta1, theta2, theta3)
 
 def inverse_kinematics_2(R3_6):
-    theta5 = atan2(norm(R3_6[0,2], R3_6[2,2]), R3_6[1,2])
 
-    # prevent wrist flaps by using consistently one of the multiple solutions
-    if sin(theta5) < 0:
-        theta4 = atan2(-R3_6[2,2], R3_6[0,2])
-        theta6 = atan2(R3_6[1,1], -R3_6[1,0])
-    else:
-        theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-        theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+#    theta5 = atan2(norm(R3_6[0,2], R3_6[2,2]), R3_6[1,2])
+#
+#    # prevent wrist flaps by using consistently one of the multiple solutions
+#    if sin(theta5) < 0.:
+#        theta4 = atan2(-R3_6[2,2], R3_6[0,2])
+#        theta6 = atan2(R3_6[1,1], -R3_6[1,0])
+#    else:
+#        theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+#        theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
-    return (theta4, theta5, theta6)
+    # Found at: http://docs.ros.org/jade/api/tf/html/python/transformations.html
+    # See source at: https://www.lfd.uci.edu/~gohlke/code/transformations.py.html
+    alpha, beta, gamma = tf.transformations.euler_from_matrix(np.array(R3_6).astype(np.float64), axes='rxyz')
+
+    return (np.pi/2 + theta4, np.pi/2 - theta5, gamma)
