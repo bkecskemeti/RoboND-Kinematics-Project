@@ -139,7 +139,7 @@ gamma = angle(side_a,side_b,side_c)
 theta1 = atan2(WC[1], WC[0])
 ```
 
-**Theta<sub>2</sub>:**
+**Theta<sub>2</sub>:** (see drawing above)
 
 ```python
 def norm(a, b):
@@ -148,7 +148,7 @@ def norm(a, b):
 theta2 = pi/2. - angle_a - atan2(WC[2] - 0.75, norm(WC[0], WC[1]) - 0.35)
 ```
 
-**Theta<sub>3</sub>:**
+**Theta<sub>3</sub>:** (see drawing above)
 
 ```python
 # 0.036 = atan2(b, sqrt(a*a - d*d))
